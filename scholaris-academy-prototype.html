@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCHOLARIS Academy — Detailed Build Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ══════════════════════════════════════════════
+     DESIGN TOKENS — Claude Code: use these as your 
+     Tailwind / CSS variable reference
+     ══════════════════════════════════════════════ */
+  :root {
+    /* Primary palette */
+    --slate-950: #0a0f1e;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    
+    /* Accent */
+    --amber-500: #d4a847;
+    --amber-400: #e8c468;
+    --amber-100: #fef3c7;
+    --amber-50: #fffbeb;
+    
+    /* Semantic */
+    --emerald-600: #059669;
+    --emerald-500: #10b981;
+    --emerald-50: #ecfdf5;
+    --sky-600: #0284c7;
+    --sky-500: #0ea5e9;
+    --sky-50: #f0f9ff;
+    --rose-600: #e11d48;
+    --rose-500: #f43f5e;
+    --rose-50: #fff1f2;
+    --orange-500: #f97316;
+    --orange-50: #fff7ed;
+    --violet-600: #7c3aed;
+    --violet-50: #f5f3ff;
+    
+    /* Layout */
+    --sidebar-w: 272px;
+    --header-h: 64px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Geist', -apple-system, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate-800);
+    line-height: 1.55;
+    font-size: 14px;
+    overflow-x: hidden;
+  }
+
+  /* ── SPEC ANNOTATION (Claude Code reference notes) ── */
+  .spec {
+    background: linear-gradient(135deg, var(--slate-950) 0%, var(--slate-800) 100%);
+    color: var(--slate-300);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    line-height: 1.65;
+    margin: 16px 0;
+    border-left: 3px solid var(--amber-500);
+    position: relative;
+  }
+  .spec::before {
+    content: attr(data-label);
+    display: block;
+    font-family: 'Geist Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--amber-400);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .spec code {
+    font-family: 'Geist Mono', monospace;
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--amber-400);
+  }
+  .spec strong { color: #fff; }
+  .spec .file-path {
+    display: inline-block;
+    background: rgba(16,185,129,0.15);
+    color: var(--emerald-500);
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+  }
+  .spec ul {
+    margin: 8px 0 0 16px;
+    list-style: none;
+  }
+  .spec ul li {
+    position: relative;
+    padding-left: 14px;
+    margin-bottom: 4px;
+  }
+  .spec ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--amber-500);
+  }
+
+  /* ── GLOBAL NAV ── */
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--slate-950);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .topnav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 52px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .topnav-inner::-webkit-scrollbar { display: none; }
+  .topnav-brand {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: #fff;
+    margin-right: 24px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .topnav-brand span { color: var(--amber-500); }
+  .tn-btn {
+    padding: 6px 14px;
+    border: none;
+    background: none;
+    font-family: 'Geist', sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--slate-400);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    transition: var(--transition);
+  }
+  .tn-btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .tn-btn.active { color: var(--amber-400); background: rgba(212,168,71,0.12); }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 120px;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; animation: pageIn 0.35s ease; }
+  @keyframes pageIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .page-header .route {
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    color: var(--slate-400);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .page-header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 30px;
+    color: var(--slate-900);
+    line-height: 1.2;
+  }
+  .page-header .subtitle {
+    font-size: 14px;
+    color: var(--slate-500);
+    margin-top: 4px;
+  }
+  .page-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: 'Geist', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--slate-900); color: #fff; }
+  .btn-primary:hover { background: var(--slate-800); }
+  .btn-secondary { background: #fff; color: var(--slate-700); border: 1px solid var(--slate-200); }
+  .btn-secondary:hover { border-color: var(--slate-400); }
+  .btn-accent { background: var(--amber-500); color: var(--slate-950); }
+  .btn-accent:hover { background: var(--amber-400); }
+  .btn-danger { background: var(--rose-50); color: var(--rose-600); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-xs { padding: 4px 8px; font-size: 11px; border-radius: 4px; }
+  .btn-icon {
+    width: 36px; height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--slate-200);
+    background: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    transition: var(--transition);
+  }
+  .btn-icon:hover { border-color: var(--slate-400); background: var(--slate-50); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  .badge-emerald { background: var(--emerald-50); color: var(--emerald-600); }
+  .badge-sky { background: var(--sky-50); color: var(--sky-600); }
+  .badge-orange { background: var(--orange-50); color: var(--orange-500); }
+  .badge-rose { background: var(--rose-50); color: var(--rose-600); }
+  .badge-violet { background: var(--violet-50); color: var(--violet-600); }
+  .badge-slate { background: var(--slate-100); color: var(--slate-600); }
+  .badge-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+  .card:hover { box-shadow: var(--shadow-md); }
+  .card-pad { padding: 20px 24px; }
+  .card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--slate-900);
+  }
+
+  /* ── STAT CARDS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  .stat-card .label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-500);
+    margin-bottom: 2px;
+  }
+  .stat-card .value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    color: var(--slate-900);
+    line-height: 1.2;
+  }
+  .stat-card .meta {
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+  .stat-card .meta.up { color: var(--emerald-600); }
+  .stat-card .meta.down { color: var(--rose-600); }
+  .stat-card .meta.neutral { color: var(--slate-400); }
+
+  /* ── TABLES ── */
+  .table-container {
+    background: #fff;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--slate-100);
+  }
+  .table-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    padding: 7px 12px;
+    border-radius: var(--radius-sm);
+    min-width: 280px;
+    transition: var(--transition);
+  }
+  .table-search:focus-within {
+    border-color: var(--slate-400);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(15,23,42,0.06);
+  }
+  .table-search input {
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+    color: var(--slate-800);
+  }
+  .table-search input::placeholder { color: var(--slate-400); }
+  .table-filters {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-select {
+    padding: 6px 28px 6px 10px;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-600);
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 8px center no-repeat;
+    appearance: none;
+    cursor: pointer;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  table thead { background: var(--slate-50); }
+  table th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--slate-500);
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+  }
+  table th:hover { color: var(--slate-800); }
+  table td {
+    padding: 12px 16px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  table tr:hover { background: var(--slate-50); }
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--slate-100);
+    font-size: 12px;
+    color: var(--slate-500);
+  }
+  .table-pagination {
+    display: flex;
+    gap: 2px;
+  }
+  .pg-btn {
+    min-width: 32px;
+    height: 32px;
+    border: 1px solid var(--slate-200);
+    background: #fff;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--slate-600);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    padding: 0 8px;
+  }
+  .pg-btn:hover { border-color: var(--slate-400); }
+  .pg-btn.active { background: var(--slate-900); color: #fff; border-color: var(--slate-900); }
+  .pg-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── AVATAR ── */
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .avatar-sm { width: 28px; height: 28px; font-size: 10px; }
+  .avatar-lg { width: 56px; height: 56px; font-size: 20px; }
+  .avatar-xl { width: 80px; height: 80px; font-size: 28px; }
+
+  /* ── FORMS ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .form-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+  .form-full { grid-column: 1 / -1; }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-600);
+  }
+  .form-label .req { color: var(--rose-500); }
+  .form-input {
+    padding: 9px 12px;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--slate-800);
+    transition: var(--transition);
+    background: #fff;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--slate-900);
+    box-shadow: 0 0 0 3px rgba(15,23,42,0.06);
+  }
+  .form-input::placeholder { color: var(--slate-400); }
+  .form-input:disabled { background: var(--slate-50); color: var(--slate-500); }
+  .form-hint {
+    font-size: 11px;
+    color: var(--slate-400);
+    margin-top: 1px;
+  }
+  .form-error {
+    font-size: 11px;
+    color: var(--rose-500);
+    margin-top: 1px;
+  }
+  select.form-input {
+    appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") right 10px center no-repeat;
+    padding-right: 32px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--slate-300);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+  .checkbox.checked {
+    background: var(--slate-900);
+    border-color: var(--slate-900);
+    color: #fff;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--slate-200);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--slate-500);
+    cursor: pointer;
+    white-space: nowrap;
+    position: relative;
+    transition: var(--transition);
+  }
+  .tab-btn:hover { color: var(--slate-800); }
+  .tab-btn.active { color: var(--slate-900); font-weight: 600; }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--slate-900);
+    border-radius: 2px 2px 0 0;
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── STEPPER ── */
+  .wizard-steps {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 28px;
+    background: var(--slate-100);
+    border-radius: var(--radius-md);
+    padding: 4px;
+  }
+  .wiz-step {
+    flex: 1;
+    text-align: center;
+    padding: 10px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate-400);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+  }
+  .wiz-step .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--slate-200);
+    color: var(--slate-500);
+    font-size: 11px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .wiz-step.done { color: var(--emerald-600); }
+  .wiz-step.done .step-num { background: var(--emerald-500); color: #fff; }
+  .wiz-step.current { background: #fff; color: var(--slate-900); box-shadow: var(--shadow-sm); }
+  .wiz-step.current .step-num { background: var(--slate-900); color: #fff; }
+
+  /* ── PIPELINE ── */
+  .pipeline-row {
+    display: flex;
+    gap: 2px;
+    margin: 16px 0;
+  }
+  .pipe-stage {
+    flex: 1;
+    background: var(--slate-100);
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--slate-500);
+    position: relative;
+    transition: var(--transition);
+    cursor: pointer;
+  }
+  .pipe-stage:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+  .pipe-stage:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .pipe-stage .pipe-count {
+    display: block;
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--slate-800);
+    margin-bottom: 2px;
+  }
+  .pipe-stage:hover { background: var(--slate-200); }
+  .pipe-stage.pipe-active { background: var(--sky-50); color: var(--sky-600); }
+  .pipe-stage.pipe-active .pipe-count { color: var(--sky-600); }
+  .pipe-stage.pipe-done { background: var(--emerald-50); color: var(--emerald-600); }
+  .pipe-stage.pipe-done .pipe-count { color: var(--emerald-600); }
+
+  /* ── SIDEBAR MOCK ── */
+  .layout-mock {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    gap: 0;
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+  }
+  .mock-sidebar {
+    background: var(--slate-950);
+    padding: 20px 0;
+    color: var(--slate-400);
+    font-size: 13px;
+    min-height: 500px;
+    overflow-y: auto;
+  }
+  .mock-sidebar .sb-brand {
+    padding: 0 20px 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .mock-sidebar .sb-brand h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .mock-sidebar .sb-brand .sb-entity {
+    font-size: 11px;
+    color: var(--amber-400);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .sb-section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--slate-600);
+    padding: 16px 20px 6px;
+    font-weight: 600;
+  }
+  .sb-item {
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--slate-400);
+    border-left: 3px solid transparent;
+  }
+  .sb-item:hover { background: rgba(255,255,255,0.04); color: var(--slate-300); }
+  .sb-item.active {
+    background: rgba(212,168,71,0.1);
+    color: var(--amber-400);
+    border-left-color: var(--amber-500);
+    font-weight: 500;
+  }
+  .sb-item .sb-icon { width: 18px; text-align: center; flex-shrink: 0; }
+  .sb-item .sb-badge {
+    margin-left: auto;
+    background: var(--rose-500);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+  }
+  .mock-main {
+    background: var(--slate-50);
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .mock-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--slate-200);
+  }
+  .mock-header-left { display: flex; align-items: center; gap: 16px; }
+  .mock-header-right { display: flex; align-items: center; gap: 10px; }
+  .mock-hamburger {
+    width: 36px; height: 36px;
+    border: 1px solid var(--slate-200);
+    background: #fff;
+    border-radius: var(--radius-sm);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress {
+    height: 6px;
+    background: var(--slate-100);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 0.8s ease;
+  }
+  .progress-fill.emerald { background: var(--emerald-500); }
+  .progress-fill.sky { background: var(--sky-500); }
+  .progress-fill.amber { background: var(--amber-500); }
+  .progress-fill.rose { background: var(--rose-500); }
+
+  /* ── GRID UTILS ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .g-40-60 { display: grid; grid-template-columns: 2fr 3fr; gap: 20px; }
+  .g-30-70 { display: grid; grid-template-columns: 3fr 7fr; gap: 20px; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--slate-200);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--slate-50);
+  }
+  .upload-zone:hover {
+    border-color: var(--slate-400);
+    background: #fff;
+  }
+  .upload-zone .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone .upload-text { font-size: 13px; color: var(--slate-500); }
+  .upload-zone .upload-hint { font-size: 11px; color: var(--slate-400); margin-top: 4px; }
+
+  /* ── MODAL ── */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,15,30,0.55);
+    backdrop-filter: blur(6px);
+    z-index: 500;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 60px 24px;
+    overflow-y: auto;
+  }
+  .modal-bg.show { display: flex; }
+  .modal-panel {
+    background: #fff;
+    border-radius: var(--radius-xl);
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlide 0.25s ease;
+  }
+  .modal-sm { max-width: 480px; }
+  .modal-md { max-width: 640px; }
+  .modal-lg { max-width: 900px; }
+  .modal-xl { max-width: 1100px; }
+  @keyframes modalSlide {
+    from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .modal-top {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-top h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    color: var(--slate-900);
+  }
+  .modal-x {
+    width: 32px; height: 32px;
+    border: none;
+    background: var(--slate-100);
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+  .modal-x:hover { background: var(--rose-50); color: var(--rose-600); }
+  .modal-body { padding: 24px 28px; }
+  .modal-foot {
+    padding: 16px 28px;
+    border-top: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: var(--slate-200);
+    margin: 24px 0;
+  }
+
+  /* ── INLINE CODE ── */
+  .mono {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .g2, .g3, .g-40-60, .g-30-70 { grid-template-columns: 1fr; }
+    .form-grid, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
+    .layout-mock { grid-template-columns: 1fr; }
+    .mock-sidebar { display: none; }
+    .mock-hamburger { display: flex; }
+    .pipeline-row { flex-wrap: wrap; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .wizard-steps { flex-wrap: wrap; }
+  }
+
+  /* ── SECTION SEPARATOR ── */
+  .section-divider {
+    margin: 48px 0 32px;
+    padding-top: 32px;
+    border-top: 2px solid var(--slate-200);
+  }
+  .section-divider h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    color: var(--slate-900);
+  }
+  .section-divider p {
+    color: var(--slate-500);
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* ── ACCOUNT LEDGER ── */
+  .ledger-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--slate-100); font-size: 13px; }
+  .ledger-row:last-child { border-bottom: none; }
+  .ledger-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── CHECKLIST ── */
+  .req-list { display: flex; flex-direction: column; gap: 8px; }
+  .req-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--slate-50);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    transition: var(--transition);
+  }
+  .req-item:hover { background: var(--slate-100); }
+  .req-check {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid var(--slate-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .req-check.done { background: var(--emerald-500); border-color: var(--emerald-500); color: #fff; }
+  .req-meta { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+  /* ── TOOLTIP ── */
+  .tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--slate-100);
+    color: var(--slate-500);
+    font-size: 9px;
+    font-weight: 700;
+    cursor: help;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--slate-400);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--slate-600); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; max-width: 360px; margin: 0 auto 16px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ TOP NAVIGATION ═══════════════════════ -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-brand">S<span>cholaris</span></div>
+    <button class="tn-btn active" data-page="layout">Layout & Nav</button>
+    <button class="tn-btn" data-page="dashboard">Dashboard</button>
+    <button class="tn-btn" data-page="students">Students</button>
+    <button class="tn-btn" data-page="registration">Registration</button>
+    <button class="tn-btn" data-page="enrollment">Enrollment</button>
+    <button class="tn-btn" data-page="academics">Academics</button>
+    <button class="tn-btn" data-page="finance">Finance</button>
+    <button class="tn-btn" data-page="hr">HR & Payroll</button>
+    <button class="tn-btn" data-page="events">Events</button>
+    <button class="tn-btn" data-page="portal">Portal</button>
+    <button class="tn-btn" data-page="preregistration">Pre-Registration</button>
+  </div>
+</nav>
+
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: LAYOUT & NAVIGATION
+     ═══════════════════════════════════════════════ -->
+<div class="page active" id="pg-layout">
+  <div class="page-header">
+    <div>
+      <div class="page-header .route" style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/app/(dashboard)/layout.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Dashboard Layout & Sidebar</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">The main authenticated shell — sidebar, header, and content area. Academy-only configuration.</div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Layout Architecture">
+    <strong>File:</strong> <span class="file-path">/app/(dashboard)/layout.tsx</span><br>
+    <strong>Sidebar width:</strong> 272px desktop, hidden on mobile with hamburger toggle<br>
+    <strong>Header height:</strong> 64px — contains school year display, notification bell (with unread count badge), and user dropdown<br>
+    <strong>Entity:</strong> Academy only — no entity switcher needed. Hard-code <code>entity_id</code> for Academy.<br>
+    <strong>State:</strong> Use Zustand store for <code>activeSchoolYear</code>, <code>currentUser</code>, <code>sidebarOpen</code><br>
+    <strong>Sidebar nav items:</strong> Show/hide based on <code>user_roles</code> join — query on mount, cache in Zustand<br>
+    <strong>Session:</strong> Use <code>@supabase/ssr</code> server client in layout to get session; redirect to <code>/login</code> if null
+  </div>
+
+  <div class="layout-mock">
+    <div class="mock-sidebar">
+      <div class="sb-brand">
+        <h2>Scholaris</h2>
+        <div class="sb-entity">Academy · SY 2025–2026</div>
+      </div>
+
+      <div class="sb-section-label">Main</div>
+      <div class="sb-item active"><span class="sb-icon">📊</span> Dashboard</div>
+
+      <div class="sb-section-label">Academic Records</div>
+      <div class="sb-item"><span class="sb-icon">👨‍🎓</span> Students</div>
+      <div class="sb-item"><span class="sb-icon">📋</span> Enrollment <span class="sb-badge">213</span></div>
+      <div class="sb-item"><span class="sb-icon">📚</span> Subjects</div>
+      <div class="sb-item"><span class="sb-icon">🏛️</span> Sections & Classes</div>
+      <div class="sb-item"><span class="sb-icon">📅</span> Schedule</div>
+      <div class="sb-item"><span class="sb-icon">📝</span> Grades</div>
+
+      <div class="sb-section-label">Finance</div>
+      <div class="sb-item"><span class="sb-icon">🏷️</span> Fee Structures</div>
+      <div class="sb-item"><span class="sb-icon">📑</span> Assessments</div>
+      <div class="sb-item"><span class="sb-icon">💳</span> Payments</div>
+      <div class="sb-item"><span class="sb-icon">📊</span> Receivables</div>
+      <div class="sb-item"><span class="sb-icon">📈</span> Financial Reports</div>
+
+      <div class="sb-section-label">Human Resources</div>
+      <div class="sb-item"><span class="sb-icon">👥</span> Employees</div>
+      <div class="sb-item"><span class="sb-icon">⏰</span> DTR / Attendance</div>
+      <div class="sb-item"><span class="sb-icon">🏖️</span> Leave Management</div>
+      <div class="sb-item"><span class="sb-icon">💵</span> Payroll</div>
+
+      <div class="sb-section-label">School Life</div>
+      <div class="sb-item"><span class="sb-icon">📅</span> Events & Retreats</div>
+      <div class="sb-item"><span class="sb-icon">🔔</span> Notifications <span class="sb-badge">5</span></div>
+
+      <div class="sb-section-label">System</div>
+      <div class="sb-item"><span class="sb-icon">👤</span> Users & Roles</div>
+      <div class="sb-item"><span class="sb-icon">🔒</span> Audit Logs</div>
+      <div class="sb-item"><span class="sb-icon">⚙️</span> Settings</div>
+    </div>
+
+    <div class="mock-main">
+      <div class="mock-header">
+        <div class="mock-header-left">
+          <button class="mock-hamburger">☰</button>
+          <div>
+            <div style="font-weight:700;font-size:15px;">Dashboard</div>
+            <div style="font-size:12px;color:var(--slate-500);">Academy · SY 2025–2026</div>
+          </div>
+        </div>
+        <div class="mock-header-right">
+          <button class="btn-icon" title="Notifications" style="position:relative;">
+            🔔
+            <span style="position:absolute;top:-2px;right:-2px;width:16px;height:16px;background:var(--rose-500);color:#fff;font-size:9px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;">5</span>
+          </button>
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border:1px solid var(--slate-200);border-radius:100px;cursor:pointer;">
+            <div class="avatar avatar-sm" style="background:var(--slate-900);">SA</div>
+            <span style="font-size:12px;font-weight:600;color:var(--slate-700);">System Admin</span>
+            <span style="font-size:10px;color:var(--slate-400);">▾</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--slate-500);text-align:center;padding:60px 20px;">
+        ← Content area renders here based on route →<br>
+        <span style="font-size:12px;">e.g. /dashboard, /dashboard/students, /dashboard/enrollment/process</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Sidebar Navigation Map">
+    <strong>Each sidebar item maps to a route. Here's the full nav structure:</strong>
+    <ul>
+      <li><code>/dashboard</code> — Dashboard (home)</li>
+      <li><code>/dashboard/students</code> — Student list</li>
+      <li><code>/dashboard/students/new</code> — New student wizard</li>
+      <li><code>/dashboard/students/[id]</code> — Student profile (tabbed)</li>
+      <li><code>/dashboard/enrollment</code> — Enrollment dashboard</li>
+      <li><code>/dashboard/enrollment/periods</code> — Manage enrollment periods</li>
+      <li><code>/dashboard/enrollment/process</code> — Enrollment processing (2-panel)</li>
+      <li><code>/dashboard/academics/subjects</code> — Subject list + CRUD</li>
+      <li><code>/dashboard/academics/sections</code> — Sections list + assignment</li>
+      <li><code>/dashboard/academics/schedule</code> — Weekly schedule view</li>
+      <li><code>/dashboard/academics/grades</code> — Grade management</li>
+      <li><code>/dashboard/accounting/fees</code> — Fee structure setup</li>
+      <li><code>/dashboard/accounting/assessments</code> — Student assessments</li>
+      <li><code>/dashboard/accounting/payments</code> — Payment recording</li>
+      <li><code>/dashboard/accounting/receivables</code> — Aging report</li>
+      <li><code>/dashboard/accounting/reports</code> — Financial reports</li>
+      <li><code>/dashboard/hr/employees</code> — Employee list</li>
+      <li><code>/dashboard/hr/attendance</code> — DTR records</li>
+      <li><code>/dashboard/hr/leave</code> — Leave requests</li>
+      <li><code>/dashboard/hr/payroll</code> — Payroll processing</li>
+      <li><code>/dashboard/events</code> — Events + retreats</li>
+      <li><code>/dashboard/notifications</code> — Notification center</li>
+      <li><code>/dashboard/settings</code> — System settings</li>
+    </ul>
+    <strong>Role-based visibility:</strong> Teachers see only: Dashboard, Grades (own classes), Schedule. Parents/Students see the Portal routes at <code>/portal/*</code> instead.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: DASHBOARD
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-dashboard">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/page.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Dashboard Home</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">The landing page after login. Shows KPIs for the active school year.</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-secondary btn-sm">📥 Export Summary</button>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Data Sources">
+    All stats query from Supabase filtered by <code>entity_id = Academy</code> and <code>school_year.is_active = true</code>.<br>
+    <strong>Total Students:</strong> <code>SELECT COUNT(*) FROM students WHERE entity_id = ? AND status IN ('active','enrolled')</code><br>
+    <strong>Enrolled:</strong> <code>SELECT COUNT(*) FROM enrollments WHERE school_year_id = ? AND status = 'enrolled'</code><br>
+    <strong>Pending:</strong> <code>enrollments WHERE status IN ('pre_registered','requirements','assessed')</code><br>
+    <strong>Collections:</strong> <code>SELECT SUM(amount) FROM payments WHERE status = 'confirmed' AND school_year via assessment join</code><br>
+    Use Supabase <code>realtime</code> subscription on <code>enrollments</code> and <code>payments</code> tables for live updates.
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">Total Students</div>
+      <div class="value">2,847</div>
+      <div class="meta up">↑ 12.3% from last SY</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Enrolled SY 2025–2026</div>
+      <div class="value">2,634</div>
+      <div class="meta neutral">92.5% of 2,847</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Pending Enrollment</div>
+      <div class="value">213</div>
+      <div class="meta down">Needs processing</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total Collections</div>
+      <div class="value">₱98.7M</div>
+      <div class="meta up">↑ 69.3% of assessed</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Overdue Accounts</div>
+      <div class="value">284</div>
+      <div class="meta down">₱12.4M outstanding</div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Enrollment by Level</span>
+        <button class="btn btn-secondary btn-sm">View All</button>
+      </div>
+      <div class="card-pad">
+        <table style="width:100%;">
+          <thead><tr>
+            <th style="text-align:left;padding:8px 0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--slate-500);">Level</th>
+            <th style="text-align:center;font-size:11px;color:var(--slate-500);">Target</th>
+            <th style="text-align:center;font-size:11px;color:var(--slate-500);">Enrolled</th>
+            <th style="text-align:right;font-size:11px;color:var(--slate-500);">Progress</th>
+          </tr></thead>
+          <tbody style="font-size:13px;">
+            <tr><td style="padding:8px 0;font-weight:600;">Grade 1–6 (Elem)</td><td style="text-align:center;">1,200</td><td style="text-align:center;">1,145</td><td style="text-align:right;"><div class="progress" style="width:100px;display:inline-block;vertical-align:middle;"><div class="progress-fill emerald" style="width:95%;"></div></div> <span class="mono" style="color:var(--emerald-600);">95%</span></td></tr>
+            <tr><td style="padding:8px 0;font-weight:600;">Grade 7–10 (JHS)</td><td style="text-align:center;">1,100</td><td style="text-align:center;">986</td><td style="text-align:right;"><div class="progress" style="width:100px;display:inline-block;vertical-align:middle;"><div class="progress-fill amber" style="width:90%;"></div></div> <span class="mono" style="color:var(--amber-500);">90%</span></td></tr>
+            <tr><td style="padding:8px 0;font-weight:600;">Grade 11–12 (SHS)</td><td style="text-align:center;">500</td><td style="text-align:center;">403</td><td style="text-align:right;"><div class="progress" style="width:100px;display:inline-block;vertical-align:middle;"><div class="progress-fill sky" style="width:81%;"></div></div> <span class="mono" style="color:var(--sky-600);">81%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Quick Actions</span>
+      </div>
+      <div class="card-pad">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn btn-primary" style="width:100%;justify-content:center;">+ Register New Student</button>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;">📋 Process Enrollment</button>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;">💳 Record Payment</button>
+          <button class="btn btn-secondary" style="width:100%;justify-content:center;">📊 View Receivables Report</button>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--amber-50);border-radius:var(--radius-sm);border:1px solid var(--amber-100);">
+          <div style="font-size:12px;font-weight:600;color:var(--amber-500);">⚡ Today's Activity</div>
+          <div style="font-size:12px;color:var(--slate-600);margin-top:4px;">18 enrollments processed · 12 payments recorded · 3 new pre-registrations</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: STUDENT LIST
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-students">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/students/page.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Students</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">All registered students for Academy · SY 2025–2026</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-secondary btn-sm">📥 Export CSV</button>
+      <button class="btn btn-secondary btn-sm">📊 Export Excel</button>
+      <button class="btn btn-primary btn-sm" onclick="showPage('registration')">+ Add Student</button>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Student List Implementation">
+    <strong>File:</strong> <span class="file-path">/dashboard/students/page.tsx</span><br>
+    <strong>Data table:</strong> Use <code>@tanstack/react-table</code> with server-side pagination<br>
+    <strong>Query:</strong> <code>students</code> joined with <code>profiles</code> (for name), <code>enrollments</code> (current SY for level/section), <code>sections</code>, <code>levels</code><br>
+    <strong>Search:</strong> Debounced 300ms — search <code>profiles.first_name</code>, <code>profiles.last_name</code>, <code>students.student_number</code>, <code>students.lrn</code> using <code>ilike</code><br>
+    <strong>Filters:</strong> Level (dropdown from <code>levels</code> table), Section, Status (<code>active</code>, <code>enrolled</code>, <code>inactive</code>, <code>transferee</code>, <code>applicant</code>)<br>
+    <strong>Sort:</strong> Click column headers to sort. Default: last_name ASC<br>
+    <strong>Pagination:</strong> 20 per page. Use Supabase <code>.range(from, to)</code><br>
+    <strong>Row click:</strong> Navigate to <code>/dashboard/students/[id]</code><br>
+    <strong>Export:</strong> CSV via client-side download, Excel via <code>xlsx</code> library. Query all matching records (no pagination) for export.
+  </div>
+
+  <div class="table-container">
+    <div class="table-toolbar">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <div class="table-search">
+          <span style="color:var(--slate-400);">🔍</span>
+          <input placeholder="Search name, student number, or LRN...">
+        </div>
+        <div class="table-filters">
+          <select class="filter-select">
+            <option>All Levels</option>
+            <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+            <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+            <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option>
+            <option>Grade 10</option><option>Grade 11 STEM</option><option>Grade 11 ABM</option>
+            <option>Grade 11 HUMSS</option><option>Grade 11 GAS</option>
+            <option>Grade 12 STEM</option><option>Grade 12 ABM</option>
+            <option>Grade 12 HUMSS</option><option>Grade 12 GAS</option>
+          </select>
+          <select class="filter-select">
+            <option>All Sections</option>
+            <option>St. Paul</option><option>St. Matthew</option><option>St. Luke</option><option>St. John</option>
+          </select>
+          <select class="filter-select">
+            <option>All Status</option>
+            <option>✅ Enrolled</option><option>⏳ Pending</option><option>❌ Inactive</option><option>📝 Applicant</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--slate-400);">
+        <span class="badge badge-slate">2,847 total</span>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:40px;"><div class="checkbox" style="width:16px;height:16px;"></div></th>
+          <th style="width:44px;"></th>
+          <th>Student Number ↕</th>
+          <th>Full Name ↕</th>
+          <th>LRN</th>
+          <th>Level</th>
+          <th>Section</th>
+          <th>Gender</th>
+          <th>Status</th>
+          <th style="width:80px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="checkbox" style="width:16px;height:16px;"></div></td>
+          <td><div class="avatar" style="background:#6366f1;">MR</div></td>
+          <td class="mono">ACAD-2025-00001</td>
+          <td><strong>Reyes, Maria Angela C.</strong></td>
+          <td class="mono">114523678901</td>
+          <td>Grade 10</td>
+          <td>St. Paul</td>
+          <td>Female</td>
+          <td><span class="badge badge-emerald badge-dot">Enrolled</span></td>
+          <td>
+            <button class="btn btn-secondary btn-xs" onclick="showModal('profile-modal')">View</button>
+          </td>
+        </tr>
+        <tr>
+          <td><div class="checkbox" style="width:16px;height:16px;"></div></td>
+          <td><div class="avatar" style="background:#0ea5e9;">JD</div></td>
+          <td class="mono">ACAD-2025-00042</td>
+          <td><strong>Dela Cruz, Juan Miguel S.</strong></td>
+          <td class="mono">118765432109</td>
+          <td>Grade 7</td>
+          <td>St. Matthew</td>
+          <td>Male</td>
+          <td><span class="badge badge-emerald badge-dot">Enrolled</span></td>
+          <td><button class="btn btn-secondary btn-xs">View</button></td>
+        </tr>
+        <tr>
+          <td><div class="checkbox" style="width:16px;height:16px;"></div></td>
+          <td><div class="avatar" style="background:#f43f5e;">AP</div></td>
+          <td class="mono">ACAD-2025-00108</td>
+          <td><strong>Santos, Ana Patricia L.</strong></td>
+          <td class="mono">119988776655</td>
+          <td>Grade 12 — STEM</td>
+          <td>St. Luke</td>
+          <td>Female</td>
+          <td><span class="badge badge-orange badge-dot">Pending</span></td>
+          <td><button class="btn btn-secondary btn-xs">View</button></td>
+        </tr>
+        <tr>
+          <td><div class="checkbox" style="width:16px;height:16px;"></div></td>
+          <td><div class="avatar" style="background:#10b981;">GL</div></td>
+          <td class="mono">ACAD-2025-00215</td>
+          <td><strong>Lim, Grace Marie T.</strong></td>
+          <td class="mono">112233445566</td>
+          <td>Grade 4</td>
+          <td>St. John</td>
+          <td>Female</td>
+          <td><span class="badge badge-rose badge-dot">Inactive</span></td>
+          <td><button class="btn btn-secondary btn-xs">View</button></td>
+        </tr>
+        <tr>
+          <td><div class="checkbox" style="width:16px;height:16px;"></div></td>
+          <td><div class="avatar" style="background:#f97316;">MC</div></td>
+          <td class="mono">ACAD-2025-00301</td>
+          <td><strong>Cruz, Marco Antonio R.</strong></td>
+          <td class="mono">117744558822</td>
+          <td>Grade 11 — ABM</td>
+          <td>St. Peter</td>
+          <td>Male</td>
+          <td><span class="badge badge-emerald badge-dot">Enrolled</span></td>
+          <td><button class="btn btn-secondary btn-xs">View</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="table-footer">
+      <span>Showing 1–20 of 2,847 students</span>
+      <div class="table-pagination">
+        <button class="pg-btn" disabled>← Prev</button>
+        <button class="pg-btn active">1</button>
+        <button class="pg-btn">2</button>
+        <button class="pg-btn">3</button>
+        <button class="pg-btn">…</button>
+        <button class="pg-btn">143</button>
+        <button class="pg-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Bulk Actions">
+    When checkboxes are selected, show a floating toolbar at the bottom:<br>
+    <strong>Selected: X students</strong> | <code>Export Selected</code> | <code>Print IDs</code> | <code>Assign Section</code> | <code>Update Status</code><br>
+    Use <code>@tanstack/react-table</code> row selection feature. Store selected IDs in state.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: REGISTRATION WIZARD
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-registration">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/students/new/page.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">New Student Registration</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">Multi-step wizard — all fields with validation rules for Claude Code reference.</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-secondary btn-sm" onclick="showPage('students')">← Back to Students</button>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Form Architecture">
+    <strong>Library:</strong> React Hook Form + Zod schema validation<br>
+    <strong>State:</strong> Use <code>useForm</code> with stepped validation — validate current step before allowing next<br>
+    <strong>Auto-save:</strong> Save form state to <code>localStorage</code> every 10 seconds. Restore on page load.<br>
+    <strong>Student number:</strong> Auto-generated server-side: <code>ACAD-{YEAR}-{PADDED_SEQUENCE}</code><br>
+    <strong>Photo upload:</strong> Use Supabase Storage bucket <code>student-photos</code>, resize to 400x400 max before upload<br>
+    <strong>Document upload:</strong> Use Supabase Storage bucket <code>documents</code>, max 5MB per file, accept PDF/JPG/PNG<br>
+    <strong>On submit:</strong> Single transaction — create <code>profile</code> → <code>student</code> → <code>guardians</code> → <code>student_guardians</code> → <code>student_documents</code>
+  </div>
+
+  <!-- Wizard Steps -->
+  <div class="wizard-steps">
+    <div class="wiz-step done"><span class="step-num">✓</span> Student Info</div>
+    <div class="wiz-step current"><span class="step-num">2</span> Guardian Info</div>
+    <div class="wiz-step"><span class="step-num">3</span> Previous School</div>
+    <div class="wiz-step"><span class="step-num">4</span> Review & Submit</div>
+  </div>
+
+  <!-- STEP 1 FIELDS SPEC -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header"><span class="card-title">Step 1 — Student Information</span><span class="badge badge-emerald">Complete ✓</span></div>
+    <div class="card-pad">
+      <div class="spec" data-label="Zod Validation — Step 1" style="margin-top:0;">
+        <code>first_name</code>: string, min 2, required · <code>last_name</code>: string, min 2, required<br>
+        <code>middle_name</code>: string, optional · <code>suffix</code>: enum ['Jr.','Sr.','III','IV','V'], optional<br>
+        <code>date_of_birth</code>: date, required, must be past, student must be ≥ 5 years old<br>
+        <code>gender</code>: enum ['Male','Female'], required<br>
+        <code>lrn</code>: string, exactly 12 digits, optional (required for Grade 2+)<br>
+        <code>religion</code>: string, optional · <code>nationality</code>: string, default 'Filipino'<br>
+        <code>photo</code>: file, optional, max 2MB, image/jpeg or image/png<br>
+        <code>address.street</code>: string · <code>address.barangay</code>: string · <code>address.city</code>: string, required<br>
+        <code>address.province</code>: string, required · <code>address.zip</code>: string, 4 digits<br>
+        <code>contact_number</code>: regex <code>/^\+63 9\d{2} \d{3} \d{4}$/</code>, optional<br>
+        <code>email</code>: email format, optional
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name <span class="req">*</span></label><input class="form-input" value="Maria Angela" readonly></div>
+        <div class="form-group"><label class="form-label">Middle Name</label><input class="form-input" value="Chua" readonly></div>
+        <div class="form-group"><label class="form-label">Last Name <span class="req">*</span></label><input class="form-input" value="Reyes" readonly></div>
+        <div class="form-group"><label class="form-label">Suffix</label><select class="form-input" disabled><option>None</option></select></div>
+      </div>
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="form-group"><label class="form-label">Date of Birth <span class="req">*</span></label><input class="form-input" type="date" value="2011-03-15" readonly></div>
+        <div class="form-group"><label class="form-label">Gender <span class="req">*</span></label><select class="form-input" disabled><option>Female</option></select></div>
+        <div class="form-group"><label class="form-label">LRN</label><input class="form-input" value="114523678901" readonly><div class="form-hint">Learner Reference Number — 12 digits</div></div>
+        <div class="form-group"><label class="form-label">Religion</label><input class="form-input" value="Christian" readonly></div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="form-group">
+          <label class="form-label">Student Photo</label>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div class="avatar avatar-xl" style="background:#6366f1;">MR</div>
+            <div class="upload-zone" style="flex:1;padding:16px;">
+              <div class="upload-text">Click or drag to upload photo</div>
+              <div class="upload-hint">JPG or PNG, max 2MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px;"><label class="form-label" style="margin-bottom:8px;">Address</label></div>
+      <div class="form-grid-4">
+        <div class="form-group form-full" style="grid-column:1/-1;"><input class="form-input" value="123 Rizal Street" placeholder="Street" readonly></div>
+        <div class="form-group"><input class="form-input" value="Brgy. San Antonio" placeholder="Barangay" readonly></div>
+        <div class="form-group"><input class="form-input" value="Quezon City" placeholder="City *" readonly></div>
+        <div class="form-group"><input class="form-input" value="Metro Manila" placeholder="Province *" readonly></div>
+        <div class="form-group"><input class="form-input" value="1100" placeholder="Zip (4 digits)" readonly></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 - GUARDIAN (current) -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header"><span class="card-title">Step 2 — Guardian Information</span><span class="badge badge-sky">Current Step</span></div>
+    <div class="card-pad">
+      <div class="spec" data-label="Claude Code — Guardian Logic" style="margin-top:0;">
+        <strong>Minimum 1 guardian required.</strong> Can add multiple (Father, Mother, Guardian, Grandparent).<br>
+        <strong>Search existing:</strong> Before creating new guardian, search <code>guardians</code> table by name/phone. If found, link via <code>student_guardians</code>.<br>
+        <strong>Zod:</strong> <code>first_name</code>: min 2, required · <code>last_name</code>: min 2, required · <code>relationship</code>: required<br>
+        <code>contact_number</code>: PH format, required · <code>email</code>: valid email, required<br>
+        <code>is_primary</code>: exactly one guardian must be primary · <code>is_emergency_contact</code>: at least one
+      </div>
+
+      <!-- Added guardians list -->
+      <div style="margin-bottom:16px;padding:14px;background:var(--emerald-50);border-radius:var(--radius-sm);border:1px solid rgba(5,150,105,0.15);">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar avatar-sm" style="background:var(--slate-700);">RR</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Roberto C. Reyes</div>
+              <div style="font-size:11px;color:var(--slate-500);">Father · +63 917 123 4567</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            <span class="badge badge-emerald">Primary</span>
+            <span class="badge badge-sky">Emergency</span>
+            <button class="btn btn-secondary btn-xs">Edit</button>
+            <button class="btn btn-danger btn-xs">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add new guardian form -->
+      <div style="padding:16px;border:1px dashed var(--slate-300);border-radius:var(--radius-md);background:var(--slate-50);">
+        <div style="font-weight:600;font-size:13px;margin-bottom:12px;">+ Add Another Guardian</div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">First Name <span class="req">*</span></label><input class="form-input" placeholder="e.g. Teresa"></div>
+          <div class="form-group"><label class="form-label">Last Name <span class="req">*</span></label><input class="form-input" placeholder="e.g. Reyes"></div>
+          <div class="form-group"><label class="form-label">Middle Name</label><input class="form-input" placeholder="Optional"></div>
+          <div class="form-group"><label class="form-label">Relationship <span class="req">*</span></label>
+            <select class="form-input"><option value="">Select...</option><option>Father</option><option selected>Mother</option><option>Guardian</option><option>Grandparent</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Contact Number <span class="req">*</span></label><input class="form-input" placeholder="+63 9XX XXX XXXX"></div>
+          <div class="form-group"><label class="form-label">Email <span class="req">*</span></label><input class="form-input" placeholder="email@example.com"></div>
+          <div class="form-group"><label class="form-label">Occupation</label><input class="form-input" placeholder="e.g. Teacher"></div>
+          <div class="form-group"><label class="form-label">Employer</label><input class="form-input" placeholder="e.g. DepEd"></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;">
+          <label class="checkbox-row"><div class="checkbox">✓</div> Same address as student</label>
+          <label class="checkbox-row"><div class="checkbox"></div> Primary Contact</label>
+          <label class="checkbox-row"><div class="checkbox checked">✓</div> Emergency Contact</label>
+        </div>
+        <div style="margin-top:14px;"><button class="btn btn-secondary btn-sm">+ Add Guardian</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 SPEC -->
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header"><span class="card-title">Step 3 — Previous School (New/Transferee)</span><span class="badge badge-slate">Upcoming</span></div>
+    <div class="card-pad">
+      <div class="spec" data-label="Claude Code — Step 3 Fields" style="margin-top:0;">
+        <strong>Show this step only for enrollment_type = 'new' or 'transferee'.</strong> Skip for returning students.<br>
+        <code>previous_school_name</code>: string · <code>previous_school_address</code>: string<br>
+        <code>level_completed</code>: string · <code>transfer_date</code>: date · <code>reason_for_transfer</code>: text<br>
+        <strong>Documents:</strong> Upload Form 137 (required for new), Honorable Dismissal (transferee), Certificate of Transfer (transferee)<br>
+        Each document → <code>student_documents</code> with <code>document_type</code>, <code>file_url</code> from Supabase Storage <code>documents</code> bucket
+      </div>
+      <div style="color:var(--slate-400);font-size:13px;text-align:center;padding:20px;">Fields will appear when this step is active</div>
+    </div>
+  </div>
+
+  <!-- STEP 4 SPEC -->
+  <div class="card">
+    <div class="card-header"><span class="card-title">Step 4 — Review & Submit</span><span class="badge badge-slate">Final</span></div>
+    <div class="card-pad">
+      <div class="spec" data-label="Claude Code — Submit Logic" style="margin-top:0;">
+        Show all entered data in read-only format with "Edit" button per section.<br>
+        <strong>On submit — single Supabase transaction:</strong>
+        <ul>
+          <li>Create <code>profile</code> (auth user NOT created yet — admin does that later or via invite)</li>
+          <li>Create <code>student</code> with auto-generated student_number, status: 'active'</li>
+          <li>Create each <code>guardian</code> (or link existing)</li>
+          <li>Create <code>student_guardians</code> join records</li>
+          <li>Create <code>student_documents</code> for any uploaded files</li>
+        </ul>
+        <strong>Success:</strong> Show student number prominently, "View Profile" and "Register Another" buttons
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:space-between;margin-top:20px;">
+    <button class="btn btn-secondary">← Back: Student Info</button>
+    <button class="btn btn-primary">Next: Previous School →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: ENROLLMENT
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-enrollment">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/enrollment/page.tsx + /process/page.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Enrollment System</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">Dashboard, pipeline tracking, and the 6-step enrollment processing workflow.</div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">Target</div><div class="value">2,800</div></div>
+    <div class="stat-card"><div class="label">Enrolled</div><div class="value" style="color:var(--emerald-600);">2,534</div><div class="meta up">90.5%</div></div>
+    <div class="stat-card"><div class="label">In Progress</div><div class="value" style="color:var(--sky-600);">182</div></div>
+    <div class="stat-card"><div class="label">Pre-Registered</div><div class="value" style="color:var(--violet-600);">84</div><div class="meta neutral">From online form</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <div class="card-header"><span class="card-title">Enrollment Pipeline</span></div>
+    <div class="card-pad">
+      <div class="pipeline-row">
+        <div class="pipe-stage"><span class="pipe-count">84</span>Pre-Registered</div>
+        <div class="pipe-stage"><span class="pipe-count">52</span>Requirements</div>
+        <div class="pipe-stage pipe-active"><span class="pipe-count">38</span>Assessment</div>
+        <div class="pipe-stage"><span class="pipe-count">27</span>Payment</div>
+        <div class="pipe-stage"><span class="pipe-count">65</span>Section Assign</div>
+        <div class="pipe-stage pipe-done"><span class="pipe-count">2,534</span>Enrolled ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Enrollment Pipeline">
+    <strong>Each pipeline stage = enrollment status value:</strong><br>
+    <code>pre_registered</code> → <code>requirements</code> → <code>assessed</code> → <code>payment_pending</code> → <code>section_assigned</code> → <code>enrolled</code><br>
+    <strong>Click a stage:</strong> Filter the table below to show only students in that status<br>
+    <strong>Real-time:</strong> Subscribe to <code>enrollments</code> table changes via Supabase Realtime. Update counts instantly.
+  </div>
+
+  <!-- 6-Step Enrollment Processing -->
+  <div class="section-divider">
+    <h2>Enrollment Processing (6-Step)</h2>
+    <p>The registrar's main workflow — two-panel layout with student search + stepper.</p>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Process Layout">
+    <strong>File:</strong> <span class="file-path">/dashboard/enrollment/process/page.tsx</span><br>
+    <strong>Layout:</strong> 40% left panel (search) + 60% right panel (stepper)<br>
+    <strong>Left panel:</strong> Search students, show results as cards. Toggle "Existing Student" / "New Registration"<br>
+    <strong>Right panel:</strong> Vertical stepper. Each step validates before allowing next.<br>
+    <strong>Progress save:</strong> <code>enrollments.step_completed</code> — saves current step so registrar can resume later.<br>
+    <strong>Speed:</strong> Entire flow should be completable in &lt;5 minutes per student.
+  </div>
+
+  <div class="g-40-60">
+    <!-- Left: Student Search -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Select Student</span></div>
+      <div class="card-pad">
+        <div class="table-search" style="margin-bottom:12px;">
+          <span style="color:var(--slate-400);">🔍</span>
+          <input placeholder="Search name, number, LRN...">
+        </div>
+        <!-- Result -->
+        <div style="padding:12px;border:2px solid var(--slate-900);border-radius:var(--radius-md);background:var(--slate-50);margin-bottom:8px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar" style="background:#6366f1;">MR</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">Reyes, Maria Angela C.</div>
+              <div class="mono" style="color:var(--slate-500);">ACAD-2025-00001 · Grade 9 last SY</div>
+            </div>
+            <span class="badge badge-sky">Selected</span>
+          </div>
+        </div>
+        <div style="padding:12px;border:1px solid var(--slate-200);border-radius:var(--radius-md);margin-bottom:8px;cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="avatar" style="background:#0ea5e9;">JD</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;">Dela Cruz, Juan Miguel S.</div>
+              <div class="mono" style="color:var(--slate-500);">ACAD-2025-00042 · Grade 6 last SY</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Stepper -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Processing: Reyes, Maria Angela C.</span>
+        <span class="badge badge-sky">Step 4 of 6</span>
+      </div>
+      <div class="card-pad">
+        <!-- Steps compact view -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Step 1: Balance Check -->
+          <div style="display:flex;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">Step 1 — Balance Check</div>
+              <div style="font-size:12px;color:var(--emerald-600);">No outstanding balance · Cleared</div>
+            </div>
+          </div>
+
+          <!-- Step 2: Details -->
+          <div style="display:flex;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">Step 2 — Enrollment Details</div>
+              <div style="font-size:12px;color:var(--slate-500);">SY 2025–2026 · Grade 10 · Returning · STEM Track</div>
+            </div>
+          </div>
+
+          <div class="spec" data-label="Claude Code — Step 2 Fields" style="margin:0;">
+            <code>school_year</code>: auto-selected (active SY) · <code>level</code>: auto-suggest next level for returning<br>
+            <code>enrollment_type</code>: enum ['new','returning','transferee'] · <code>program/track</code>: for SHS only (STEM, ABM, HUMSS, GAS)<br>
+            <code>scholarship_id</code>: optional dropdown from <code>scholarships</code> table
+          </div>
+
+          <!-- Step 3: Requirements -->
+          <div style="display:flex;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--emerald-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">✓</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">Step 3 — Requirements</div>
+              <div class="req-list" style="margin-top:8px;">
+                <div class="req-item"><div class="req-check done">✓</div>Updated 2x2 Photos<div class="req-meta"><span class="badge badge-emerald">Verified</span></div></div>
+                <div class="req-item"><div class="req-check done">✓</div>Report Card (Grade 9)<div class="req-meta"><span class="badge badge-emerald">Verified</span></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spec" data-label="Claude Code — Requirements Checklist Logic" style="margin:0;">
+            <strong>Checklist varies by enrollment type:</strong><br>
+            <strong>New students:</strong> Birth Certificate PSA, Form 137, Good Moral, Report Card, 2x2 Photos (4pcs), Baptismal Certificate<br>
+            <strong>Returning:</strong> Updated 2x2 Photos only<br>
+            <strong>Transferees:</strong> All new requirements + Honorable Dismissal, Certificate of Transfer<br>
+            Each item → <code>enrollment_requirements</code> row with <code>is_submitted</code>, <code>file_url</code>, <code>verified_by</code>, <code>verified_at</code><br>
+            <strong>Allow proceed without complete:</strong> Option to continue with reason (stored in notes), sets <code>requirements_complete = false</code>
+          </div>
+
+          <!-- Step 4: Assessment (ACTIVE) -->
+          <div style="display:flex;gap:12px;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--sky-500);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">4</div>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:13px;">Step 4 — Assessment <span class="badge badge-sky">Current</span></div>
+              <div style="margin-top:12px;border:1px solid var(--slate-200);border-radius:var(--radius-md);overflow:hidden;">
+                <table>
+                  <thead><tr><th>Fee</th><th>Type</th><th style="text-align:right;">Amount</th></tr></thead>
+                  <tbody>
+                    <tr><td>Tuition Fee</td><td><span class="badge badge-slate">Tuition</span></td><td style="text-align:right;">₱45,000.00</td></tr>
+                    <tr><td>Miscellaneous Fee</td><td><span class="badge badge-slate">Misc</span></td><td style="text-align:right;">₱8,500.00</td></tr>
+                    <tr><td>Laboratory Fee</td><td><span class="badge badge-slate">Lab</span></td><td style="text-align:right;">₱3,200.00</td></tr>
+                    <tr><td>Books & Materials</td><td><span class="badge badge-slate">Other</span></td><td style="text-align:right;">₱4,800.00</td></tr>
+                    <tr style="font-weight:700;background:var(--slate-50);"><td colspan="2">Gross Total</td><td style="text-align:right;">₱61,500.00</td></tr>
+                    <tr style="color:var(--emerald-600);"><td colspan="2">Scholarship Discount (10%)</td><td style="text-align:right;">−₱6,150.00</td></tr>
+                    <tr style="font-weight:700;font-size:15px;background:var(--slate-900);color:#fff;"><td colspan="2">Net Assessment</td><td style="text-align:right;">₱55,350.00</td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style="margin-top:16px;">
+                <label class="form-label">Payment Scheme</label>
+                <div style="display:flex;gap:8px;margin-top:6px;">
+                  <div style="flex:1;padding:12px;border:1px solid var(--slate-200);border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-size:12px;transition:var(--transition);">
+                    <div style="font-weight:700;">Full Payment</div>
+                    <div style="color:var(--emerald-600);font-size:11px;">5% discount</div>
+                  </div>
+                  <div style="flex:1;padding:12px;border:2px solid var(--slate-900);border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-size:12px;background:var(--slate-50);">
+                    <div style="font-weight:700;">Quarterly (4x)</div>
+                    <div style="color:var(--slate-500);font-size:11px;">₱13,837.50/qtr</div>
+                  </div>
+                  <div style="flex:1;padding:12px;border:1px solid var(--slate-200);border-radius:var(--radius-sm);cursor:pointer;text-align:center;font-size:12px;">
+                    <div style="font-weight:700;">Monthly (10x)</div>
+                    <div style="color:var(--slate-500);font-size:11px;">₱5,535.00/mo</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="spec" data-label="Claude Code — Assessment Creation" style="margin-top:12px;">
+                <strong>Auto-load fees:</strong> Query <code>fee_structures</code> WHERE <code>school_year_id</code> AND <code>level_id</code> AND <code>entity_id</code><br>
+                <strong>Scholarship:</strong> If <code>student_scholarships</code> exists, apply <code>discount_percent</code> to total<br>
+                <strong>"Create Assessment" button:</strong> Insert <code>student_assessments</code> → insert each <code>assessment_items</code> → generate <code>payment_schedule</code> rows based on scheme<br>
+                <strong>Payment schemes:</strong> Query <code>payment_schemes</code> table. <code>due_schedule</code> is JSONB with dates and amounts.
+              </div>
+
+              <button class="btn btn-accent" style="width:100%;justify-content:center;margin-top:16px;">Create Assessment & Continue →</button>
+            </div>
+          </div>
+
+          <!-- Step 5: Section -->
+          <div style="display:flex;gap:12px;opacity:0.5;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--slate-200);color:var(--slate-500);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">5</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;">Step 5 — Section Assignment</div>
+              <div style="font-size:12px;color:var(--slate-400);">Select section — shows capacity: "St. Paul (45/50)"</div>
+            </div>
+          </div>
+
+          <!-- Step 6: Confirm -->
+          <div style="display:flex;gap:12px;opacity:0.5;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--slate-200);color:var(--slate-500);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">6</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;">Step 6 — Confirmation</div>
+              <div style="font-size:12px;color:var(--slate-400);">Final review → update status to 'enrolled' → create class_students → ledger entry</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: ACADEMICS
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-academics">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/academics/*</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Academics Module</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">Subjects, sections, class schedules, grades, and attendance — all Academy levels.</div>
+    </div>
+  </div>
+
+  <div class="tabs" id="acad-tabs">
+    <button class="tab-btn active" onclick="switchAcadTab(this,'at-subjects')">Subjects</button>
+    <button class="tab-btn" onclick="switchAcadTab(this,'at-sections')">Sections</button>
+    <button class="tab-btn" onclick="switchAcadTab(this,'at-grades')">Grade Entry</button>
+    <button class="tab-btn" onclick="switchAcadTab(this,'at-attendance')">Attendance</button>
+  </div>
+
+  <div class="tab-content active" id="at-subjects">
+    <div class="spec" data-label="Claude Code — Subjects">
+      <strong>File:</strong> <span class="file-path">/dashboard/academics/subjects/page.tsx</span><br>
+      <strong>Table:</strong> <code>subjects</code> — CRUD with modal form<br>
+      <strong>Fields:</strong> <code>code</code> (unique, e.g. ENG10), <code>name</code>, <code>description</code>, <code>units</code> (numeric), <code>lecture_hours</code>, <code>lab_hours</code>, <code>subject_type</code> (core/elective/applied/specialized), <code>is_active</code><br>
+      <strong>Academy level types:</strong> elementary, junior_high, senior_high — subjects map to levels via <code>curriculum</code> table
+    </div>
+    <div class="table-container">
+      <div class="table-toolbar">
+        <div class="table-search"><span style="color:var(--slate-400);">🔍</span><input placeholder="Search subjects..."></div>
+        <button class="btn btn-primary btn-sm">+ Add Subject</button>
+      </div>
+      <table>
+        <thead><tr><th>Code</th><th>Subject Name</th><th>Type</th><th>Units</th><th>Lec/Lab Hrs</th><th>Level Range</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">FIL7</td><td>Filipino 7</td><td><span class="badge badge-slate">Core</span></td><td>1.5</td><td>4/0</td><td>Grade 7</td><td><span class="badge badge-emerald badge-dot">Active</span></td><td><button class="btn btn-secondary btn-xs">Edit</button></td></tr>
+          <tr><td class="mono">MATH10</td><td>Mathematics 10</td><td><span class="badge badge-slate">Core</span></td><td>1.5</td><td>4/0</td><td>Grade 10</td><td><span class="badge badge-emerald badge-dot">Active</span></td><td><button class="btn btn-secondary btn-xs">Edit</button></td></tr>
+          <tr><td class="mono">SCI-STEM1</td><td>General Chemistry 1</td><td><span class="badge badge-violet">Specialized</span></td><td>1.5</td><td>3/1</td><td>Grade 11 STEM</td><td><span class="badge badge-emerald badge-dot">Active</span></td><td><button class="btn btn-secondary btn-xs">Edit</button></td></tr>
+          <tr><td class="mono">CHLIFE</td><td>Christian Life</td><td><span class="badge badge-sky">Elective</span></td><td>1.0</td><td>2/0</td><td>Grade 1–12</td><td><span class="badge badge-emerald badge-dot">Active</span></td><td><button class="btn btn-secondary btn-xs">Edit</button></td></tr>
+          <tr><td class="mono">PE3</td><td>Physical Education 3</td><td><span class="badge badge-orange">Applied</span></td><td>1.0</td><td>0/2</td><td>Grade 3</td><td><span class="badge badge-emerald badge-dot">Active</span></td><td><button class="btn btn-secondary btn-xs">Edit</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="at-sections">
+    <div class="spec" data-label="Claude Code — Sections">
+      <strong>File:</strong> <span class="file-path">/dashboard/academics/sections/page.tsx</span><br>
+      <strong>Table:</strong> <code>sections</code> — each has <code>school_year_id</code>, <code>level_id</code>, <code>name</code>, <code>adviser_id</code> (FK employees), <code>room_id</code>, <code>max_students</code><br>
+      <strong>Display:</strong> Group by level. Show capacity bar (enrolled / max). Clicking a section shows its student list and class schedule.<br>
+      <strong>Assignment:</strong> Bulk assign students from enrollment processing (Step 5) or manually from this page.
+    </div>
+    <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card"><div class="label">Total Sections</div><div class="value">68</div></div>
+      <div class="stat-card"><div class="label">Elementary</div><div class="value">32</div></div>
+      <div class="stat-card"><div class="label">Junior High</div><div class="value">24</div></div>
+      <div class="stat-card"><div class="label">Senior High</div><div class="value">12</div></div>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead><tr><th>Section Name</th><th>Level</th><th>Adviser</th><th>Room</th><th>Students</th><th>Capacity</th></tr></thead>
+        <tbody>
+          <tr><td><strong>St. Paul</strong></td><td>Grade 10</td><td>Mrs. Santos, Maria T.</td><td>Room 301</td><td>45</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:80px;"><div class="progress-fill amber" style="width:90%;"></div></div><span class="mono" style="font-size:11px;">45/50</span></div></td></tr>
+          <tr><td><strong>St. Matthew</strong></td><td>Grade 7</td><td>Mr. Garcia, Roberto P.</td><td>Room 205</td><td>42</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:80px;"><div class="progress-fill emerald" style="width:84%;"></div></div><span class="mono" style="font-size:11px;">42/50</span></div></td></tr>
+          <tr><td><strong>St. Luke</strong></td><td>Grade 12 — STEM</td><td>Dr. Mendoza, Jose R.</td><td>Room 401</td><td>38</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:80px;"><div class="progress-fill emerald" style="width:76%;"></div></div><span class="mono" style="font-size:11px;">38/50</span></div></td></tr>
+          <tr><td><strong>St. Peter</strong></td><td>Grade 11 — ABM</td><td>Ms. Aquino, Liza C.</td><td>Room 402</td><td>48</td><td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="width:80px;"><div class="progress-fill rose" style="width:96%;"></div></div><span class="mono" style="font-size:11px;color:var(--rose-500);">48/50</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="tab-content" id="at-grades">
+    <div class="spec" data-label="Claude Code — Grading System">
+      <strong>File:</strong> <span class="file-path">/dashboard/academics/grades/page.tsx</span><br>
+      <strong>K–12 Grade Components (DepEd):</strong><br>
+      <code>written_work</code>: 30% (Elem) / 30% (JHS) / 25% (SHS)<br>
+      <code>performance_task</code>: 50% (Elem) / 50% (JHS) / 45% (SHS)<br>
+      <code>quarterly_exam</code>: 20% (Elem) / 20% (JHS) / 30% (SHS)<br>
+      <strong>Transmutation:</strong> Use DepEd transmutation table to convert weighted average → transmuted grade (60–100 scale)<br>
+      <strong>Grade workflow:</strong> Teacher submits → <code>grades.status = 'submitted'</code> → Dept Head reviews → Registrar approves (<code>approved_by</code>, <code>approved_at</code>) → <code>is_final = true</code> → visible in parent portal<br>
+      <strong>Grading periods:</strong> Q1, Q2, Q3, Q4 (from <code>grading_periods</code> table, linked to <code>terms</code>)
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Grade Entry — Mathematics 10 · St. Paul</span>
+          <div style="font-size:12px;color:var(--slate-500);margin-top:2px;">Teacher: Mrs. Santos · Quarter 3</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm">Save Draft</button>
+          <button class="btn btn-primary btn-sm">Submit for Review</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th style="text-align:center;">Written Work<br><span style="font-weight:400;font-size:10px;color:var(--slate-400);">30%</span></th>
+              <th style="text-align:center;">Performance Task<br><span style="font-weight:400;font-size:10px;color:var(--slate-400);">50%</span></th>
+              <th style="text-align:center;">Quarterly Exam<br><span style="font-weight:400;font-size:10px;color:var(--slate-400);">20%</span></th>
+              <th style="text-align:center;">Weighted Avg</th>
+              <th style="text-align:center;">Transmuted</th>
+              <th style="text-align:center;">Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Reyes, Maria Angela C.</strong></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="92"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="88"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="90"></td>
+              <td style="text-align:center;font-weight:700;">89.8</td>
+              <td style="text-align:center;"><span style="font-weight:800;font-size:16px;color:var(--emerald-600);">91</span></td>
+              <td style="text-align:center;"><span class="badge badge-emerald">Passed</span></td>
+            </tr>
+            <tr>
+              <td><strong>Dela Cruz, Juan Miguel S.</strong></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="72"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="68"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="70"></td>
+              <td style="text-align:center;font-weight:700;">69.6</td>
+              <td style="text-align:center;"><span style="font-weight:800;font-size:16px;color:var(--rose-500);">74</span></td>
+              <td style="text-align:center;"><span class="badge badge-rose">Failed</span></td>
+            </tr>
+            <tr>
+              <td><strong>Santos, Ana Patricia L.</strong></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="96"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="94"></td>
+              <td style="text-align:center;"><input class="form-input" style="width:60px;text-align:center;padding:6px;" value="98"></td>
+              <td style="text-align:center;font-weight:700;">95.6</td>
+              <td style="text-align:center;"><span style="font-weight:800;font-size:16px;color:var(--emerald-600);">97</span></td>
+              <td style="text-align:center;"><span class="badge badge-emerald">Passed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="at-attendance">
+    <div class="spec" data-label="Claude Code — Attendance">
+      <strong>File:</strong> <span class="file-path">/dashboard/academics/attendance/page.tsx</span> (admin view) + teacher portal view<br>
+      <strong>Table:</strong> <code>student_attendance</code> — <code>class_id</code>, <code>student_id</code>, <code>date</code>, <code>status</code> (present/late/absent/excused), <code>remarks</code><br>
+      <strong>Teacher entry:</strong> Select class → date → bulk mark all present → individually adjust late/absent<br>
+      <strong>Notification:</strong> If student has 3+ consecutive absences, auto-trigger notification to parent
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">Attendance — Grade 10 St. Paul · English 10</span>
+          <div style="font-size:12px;color:var(--slate-500);margin-top:2px;">February 7, 2026 · Teacher: Mrs. Santos</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm">Mark All Present</button>
+          <button class="btn btn-primary btn-sm">Save Attendance</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Student</th><th style="text-align:center;">Present</th><th style="text-align:center;">Late</th><th style="text-align:center;">Absent</th><th style="text-align:center;">Excused</th><th>Remarks</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Reyes, Maria Angela C.</strong></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;background:var(--emerald-500);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><strong>Dela Cruz, Juan Miguel S.</strong></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;background:var(--orange-500);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td style="text-align:center;"><div style="width:24px;height:24px;border-radius:50%;border:2px solid var(--slate-200);margin:0 auto;"></div></td>
+            <td class="mono" style="font-size:11px;color:var(--slate-400);">Arrived 7:45 AM</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: FINANCE (Compact)
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-finance">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/accounting/*</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Finance & Accounting</h1>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="label">Total Assessed</div><div class="value">₱142.5M</div></div>
+    <div class="stat-card"><div class="label">Collected</div><div class="value" style="color:var(--emerald-600);">₱98.7M</div><div class="meta up">69.3%</div></div>
+    <div class="stat-card"><div class="label">Receivables</div><div class="value" style="color:var(--orange-500);">₱43.8M</div></div>
+    <div class="stat-card"><div class="label">Overdue</div><div class="value" style="color:var(--rose-600);">284</div><div class="meta down">accounts</div></div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Finance Module Pages">
+    <strong>4 main pages:</strong>
+    <ul>
+      <li><span class="file-path">/accounting/fees</span> — CRUD <code>fee_structures</code> (setup fees per SY/level). Fields: fee_name, amount, fee_type (tuition/misc/lab/other), is_required, is_per_unit, per_unit_rate</li>
+      <li><span class="file-path">/accounting/assessments</span> — View/create student assessments. Search student → show computed assessment → allow manual adjustments → save</li>
+      <li><span class="file-path">/accounting/payments</span> — Payment recording. Fields: student (search), amount, payment_method (Cash/Bank/GCash/Maya/Check), reference_number, or_number (auto-generate or manual), payment_date. Creates <code>payments</code> + updates <code>student_ledger</code></li>
+      <li><span class="file-path">/accounting/receivables</span> — Aging report: Current / 30 days / 60 days / 90+ days overdue. Filter by level. Export to Excel.</li>
+    </ul>
+    <strong>Currency:</strong> Always format as ₱ with 2 decimal places. Use <code>NUMERIC(12,2)</code> for all money columns.
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">💳 Record Payment</span></div>
+      <div class="card-pad">
+        <div class="form-group"><label class="form-label">Student <span class="req">*</span></label><input class="form-input" value="Reyes, Maria Angela C. · ACAD-2025-00001" readonly style="background:var(--slate-50);"></div>
+        <div class="form-grid" style="margin-top:12px;">
+          <div class="form-group"><label class="form-label">Amount (₱) <span class="req">*</span></label><input class="form-input" value="13,837.50"></div>
+          <div class="form-group"><label class="form-label">Payment Method <span class="req">*</span></label><select class="form-input"><option>Cash</option><option>Bank Transfer</option><option>GCash</option><option>Maya</option><option>Check</option></select></div>
+          <div class="form-group"><label class="form-label">OR Number</label><input class="form-input" value="OR-2025-004892" readonly style="background:var(--slate-50);"><div class="form-hint">Auto-generated</div></div>
+          <div class="form-group"><label class="form-label">Payment Date</label><input class="form-input" type="date" value="2026-02-07"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">Confirm & Record Payment</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">📒 Student Ledger</span><span style="font-size:12px;color:var(--slate-500);">Reyes, Maria Angela · SY 2025–2026</span></div>
+      <div class="card-pad" style="padding-top:8px;">
+        <table style="font-size:12px;">
+          <thead><tr><th>Date</th><th>Description</th><th style="text-align:right;">Debit</th><th style="text-align:right;">Credit</th><th style="text-align:right;">Balance</th></tr></thead>
+          <tbody>
+            <tr><td>Jun 15</td><td>SY 2025-26 Assessment</td><td style="text-align:right;">₱55,350.00</td><td style="text-align:right;">—</td><td style="text-align:right;">₱55,350.00</td></tr>
+            <tr><td>Jun 20</td><td>Payment · OR-4871</td><td style="text-align:right;">—</td><td style="text-align:right;color:var(--emerald-600);">₱13,837.50</td><td style="text-align:right;">₱41,512.50</td></tr>
+            <tr><td>Sep 18</td><td>Payment · OR-4872</td><td style="text-align:right;">—</td><td style="text-align:right;color:var(--emerald-600);">₱13,837.50</td><td style="text-align:right;">₱27,675.00</td></tr>
+            <tr><td>Dec 20</td><td>Payment · OR-4891</td><td style="text-align:right;">—</td><td style="text-align:right;color:var(--emerald-600);">₱13,837.50</td><td style="text-align:right;font-weight:700;color:var(--orange-500);">₱13,837.50</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;padding:10px;background:var(--orange-50);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--orange-500);border:1px solid rgba(249,115,22,0.15);">
+          ⚠ Remaining: ₱13,837.50 · Due: March 15, 2026 (Q4 installment)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: HR & PAYROLL (Compact)
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-hr">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/hr/*</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">HR & Payroll</h1>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — HR Module">
+    <strong>Employee types:</strong> <code>employment_type</code>: 'regular', 'probationary', 'contractual', 'part_time'<br>
+    <strong>Salary types:</strong> <code>salary_type</code>: 'monthly', 'daily'<br>
+    <strong>Statutory deductions (auto-compute):</strong>
+    <ul>
+      <li><strong>SSS:</strong> Use 2025 SSS contribution table. Lookup by salary bracket.</li>
+      <li><strong>PhilHealth:</strong> 5% of basic salary, split 50/50 employee/employer. Cap at ₱5,000/month.</li>
+      <li><strong>Pag-IBIG:</strong> ₱100 if salary ≤ ₱1,500; ₱200 if &gt; ₱1,500. Employer matches.</li>
+      <li><strong>BIR Tax:</strong> Use 2025 BIR tax table with bracket computation. Factor in <code>tax_status</code> (S, S1, S2, M, M1, etc.)</li>
+    </ul>
+    <strong>Payroll periods:</strong> Semi-monthly (1–15 and 16–end). Status: draft → computed → approved → paid<br>
+    <strong>Loans:</strong> <code>employee_loans</code> — SSS Salary Loan, Pag-IBIG Loan, Cash Advance. Monthly deduction auto-included in payroll.
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Payroll — January 16–31, 2026 · 2nd Cutoff</span><span class="badge badge-orange badge-dot">Draft</span></div>
+    <div style="overflow-x:auto;">
+      <table style="font-size:12px;">
+        <thead>
+          <tr><th>Employee</th><th>Department</th><th style="text-align:right;">Basic</th><th style="text-align:right;">OT</th><th style="text-align:right;">Gross</th><th style="text-align:right;">SSS</th><th style="text-align:right;">PhilHealth</th><th style="text-align:right;">Pag-IBIG</th><th style="text-align:right;">Tax</th><th style="text-align:right;">Loans</th><th style="text-align:right;color:var(--emerald-600);font-weight:700;">Net Pay</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Santos, Maria T.</strong><br><span class="mono" style="color:var(--slate-400);">EMP-0001 · Faculty</span></td>
+            <td>Academics</td>
+            <td style="text-align:right;">₱18,500</td><td style="text-align:right;">₱0</td><td style="text-align:right;">₱18,500</td>
+            <td style="text-align:right;">₱900.00</td><td style="text-align:right;">₱462.50</td><td style="text-align:right;">₱200.00</td><td style="text-align:right;">₱1,245.83</td><td style="text-align:right;">₱1,500.00</td>
+            <td style="text-align:right;font-weight:700;color:var(--emerald-600);">₱14,191.67</td>
+          </tr>
+          <tr>
+            <td><strong>Garcia, Roberto P.</strong><br><span class="mono" style="color:var(--slate-400);">EMP-0042 · Maintenance</span></td>
+            <td>Admin</td>
+            <td style="text-align:right;">₱9,200</td><td style="text-align:right;">₱1,150</td><td style="text-align:right;">₱10,350</td>
+            <td style="text-align:right;">₱450.00</td><td style="text-align:right;">₱258.75</td><td style="text-align:right;">₱200.00</td><td style="text-align:right;">₱0.00</td><td style="text-align:right;">₱800.00</td>
+            <td style="text-align:right;font-weight:700;color:var(--emerald-600);">₱8,641.25</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:16px 24px;border-top:1px solid var(--slate-100);display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm">Recompute All</button>
+      <button class="btn btn-primary btn-sm">Submit for Approval</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: EVENTS
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-events">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/dashboard/events/page.tsx</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Events & Retreats</h1>
+    </div>
+    <button class="btn btn-primary btn-sm">+ Create Event</button>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Events">
+    <strong>Table:</strong> <code>events</code> — create with <code>event_type</code> (retreat/academic/sports/cultural/assembly), <code>target_levels</code> (JSONB array of level_ids), <code>requires_registration</code>, <code>requires_fee</code>, <code>requires_consent</code><br>
+    <strong>Registration flow:</strong> Student registers → if <code>requires_consent</code>, parent must approve in portal → if <code>requires_fee</code>, payment recorded → QR code generated (<code>event_registrations.qr_code</code>)<br>
+    <strong>QR Check-in:</strong> Staff scans QR at venue → updates <code>checked_in_at</code> timestamp. Use device camera via <code>html5-qrcode</code> library.<br>
+    <strong>Monthly retreats:</strong> The school runs monthly spiritual retreats. This is a high-priority use case — make event creation fast and templates reusable.
+  </div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-pad">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <span class="badge badge-violet badge-dot">Retreat</span>
+          <span style="font-size:11px;color:var(--slate-400);">Feb 14–15</span>
+        </div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--slate-900);margin:10px 0 4px;">Grade 10 Spiritual Retreat</h4>
+        <div style="font-size:12px;color:var(--slate-500);">📍 Camp Faith, Tanay, Rizal</div>
+        <div style="margin:12px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>Registered</span><span>142 / 180</span></div>
+          <div class="progress"><div class="progress-fill amber" style="width:79%;"></div></div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;">
+          <span class="badge badge-emerald">Published</span>
+          <span class="badge badge-sky">₱500 fee</span>
+          <span class="badge badge-orange">Consent required</span>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-secondary btn-xs" style="flex:1;justify-content:center;">View</button>
+          <button class="btn btn-primary btn-xs" style="flex:1;justify-content:center;">QR Check-in</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-pad">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <span class="badge badge-sky badge-dot">Sports</span>
+          <span style="font-size:11px;color:var(--slate-400);">Feb 28</span>
+        </div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--slate-900);margin:10px 0 4px;">Intramurals 2026</h4>
+        <div style="font-size:12px;color:var(--slate-500);">📍 School Gymnasium</div>
+        <div style="margin:12px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>Registered</span><span>0 / 500</span></div>
+          <div class="progress"><div class="progress-fill sky" style="width:0%;"></div></div>
+        </div>
+        <span class="badge badge-orange badge-dot" style="margin-bottom:12px;">Upcoming</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-pad">
+        <div style="display:flex;justify-content:space-between;align-items:start;">
+          <span class="badge badge-violet badge-dot">Retreat</span>
+          <span style="font-size:11px;color:var(--slate-400);">Jan 17</span>
+        </div>
+        <h4 style="font-size:15px;font-weight:700;color:var(--slate-900);margin:10px 0 4px;">Grade 7 Orientation Retreat</h4>
+        <div style="font-size:12px;color:var(--slate-500);">📍 School Chapel</div>
+        <div style="margin:12px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>Checked In</span><span>165 / 168</span></div>
+          <div class="progress"><div class="progress-fill emerald" style="width:98%;"></div></div>
+        </div>
+        <span class="badge badge-emerald badge-dot">Completed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: PARENT PORTAL
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-portal">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/portal/*</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Parent & Student Portal</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">Separate authenticated area — parents see children's info, students see their own.</div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Portal Architecture">
+    <strong>Routes:</strong> <span class="file-path">/portal</span> layout separate from <span class="file-path">/dashboard</span><br>
+    <strong>Auth:</strong> Same Supabase auth. Middleware checks role: if 'parent' or 'student' → redirect to <code>/portal</code>, else → <code>/dashboard</code><br>
+    <strong>Parent view:</strong> Shows all linked children via <code>student_guardians</code> → <code>students</code>. Can switch between children.<br>
+    <strong>Portal pages:</strong>
+    <ul>
+      <li><code>/portal</code> — Home with child cards (grades summary + balance)</li>
+      <li><code>/portal/grades</code> — Report card per quarter</li>
+      <li><code>/portal/payments</code> — Payment history + balance</li>
+      <li><code>/portal/events</code> — Event list + registration + consent form</li>
+      <li><code>/portal/documents</code> — Upload pending requirements</li>
+    </ul>
+    <strong>Design:</strong> Mobile-first, simpler than admin dashboard. Large touch targets. Clean card-based layout.
+  </div>
+
+  <div style="max-width:420px;margin:0 auto;">
+    <div class="card" style="border:2px solid var(--slate-900);">
+      <div class="card-pad" style="text-align:center;padding:24px;">
+        <div style="font-family:'Instrument Serif',serif;font-size:24px;color:var(--slate-900);">Scholaris</div>
+        <div style="font-size:12px;color:var(--slate-500);margin-top:2px;">Parent Portal</div>
+        <div style="font-size:13px;color:var(--slate-600);margin-top:16px;">Welcome, Mr. Roberto Reyes</div>
+      </div>
+      <div style="padding:0 24px 24px;">
+        <div style="background:var(--slate-50);border-radius:var(--radius-md);padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div class="avatar" style="background:#6366f1;">MR</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;">Maria Angela C. Reyes</div>
+              <div style="font-size:11px;color:var(--slate-500);">Grade 10 · St. Paul · ACAD-2025-00001</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="background:#fff;padding:12px;border-radius:var(--radius-sm);text-align:center;border:1px solid var(--slate-200);">
+              <div style="font-size:10px;color:var(--slate-500);text-transform:uppercase;">Average</div>
+              <div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--emerald-600);">91.2</div>
+            </div>
+            <div style="background:#fff;padding:12px;border-radius:var(--radius-sm);text-align:center;border:1px solid var(--slate-200);">
+              <div style="font-size:10px;color:var(--slate-500);text-transform:uppercase;">Balance</div>
+              <div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--orange-500);">₱13.8K</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--slate-50);border-radius:var(--radius-sm);cursor:pointer;">
+            <span>📝</span><div style="flex:1;"><strong style="font-size:13px;">View Grades</strong><br><span style="font-size:11px;color:var(--slate-400);">Q1–Q3 report cards</span></div><span style="color:var(--slate-400);">→</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--slate-50);border-radius:var(--radius-sm);cursor:pointer;">
+            <span>💰</span><div style="flex:1;"><strong style="font-size:13px;">Payment History</strong><br><span style="font-size:11px;color:var(--slate-400);">3 of 4 installments paid</span></div><span style="color:var(--slate-400);">→</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--orange-50);border-radius:var(--radius-sm);cursor:pointer;border:1px solid rgba(249,115,22,0.15);">
+            <span>📅</span><div style="flex:1;"><strong style="font-size:13px;">Spiritual Retreat — Feb 14</strong><br><span style="font-size:11px;color:var(--orange-500);">⚠ Consent form required</span></div><span style="color:var(--slate-400);">→</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--slate-50);border-radius:var(--radius-sm);cursor:pointer;">
+            <span>📄</span><div style="flex:1;"><strong style="font-size:13px;">Documents</strong><br><span style="font-size:11px;color:var(--slate-400);">All requirements submitted</span></div><span style="color:var(--slate-400);">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAGE: PRE-REGISTRATION
+     ═══════════════════════════════════════════════ -->
+<div class="page" id="pg-preregistration">
+  <div class="page-header">
+    <div>
+      <div style="font-family:'Geist Mono',monospace;font-size:11px;color:var(--slate-400);margin-bottom:6px;">/app/(public)/enroll/page.tsx — NO AUTH REQUIRED</div>
+      <h1 style="font-family:'Instrument Serif',serif;font-size:30px;color:var(--slate-900);">Online Pre-Registration</h1>
+      <div style="font-size:14px;color:var(--slate-500);margin-top:4px;">Public-facing mobile-first form. School shares this link on Facebook for parents.</div>
+    </div>
+  </div>
+
+  <div class="spec" data-label="Claude Code — Public Pre-Registration">
+    <strong>Route:</strong> <span class="file-path">/app/(public)/enroll/page.tsx</span> — outside (dashboard) layout, NO authentication required<br>
+    <strong>Design:</strong> Mobile-first (80%+ traffic from phones). Beautiful. School branding. Large touch targets.<br>
+    <strong>Anti-spam:</strong> Honeypot hidden field + rate limit 5 submissions per IP per hour (use Supabase Edge Function or API route)<br>
+    <strong>On submit:</strong> Create <code>student</code> (status: 'applicant'), <code>guardians</code>, <code>enrollment</code> (status: 'pre_registered')<br>
+    <strong>Success page:</strong> Show pre-registration number <code>PRE-{YYYY}-{SEQ}</code>, "What happens next" explainer, school contact info<br>
+    <strong>Academy only:</strong> Level options are Grade 1–12 with SHS tracks
+  </div>
+
+  <div style="max-width:420px;margin:0 auto;">
+    <div class="card" style="border:2px solid var(--amber-500);">
+      <div style="background:linear-gradient(135deg,var(--slate-950),var(--slate-800));padding:24px;text-align:center;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+        <div style="font-family:'Instrument Serif',serif;font-size:28px;color:#fff;">Scholaris</div>
+        <div style="color:var(--amber-400);font-size:13px;font-weight:500;margin-top:4px;">Online Pre-Registration · SY 2025–2026</div>
+      </div>
+      <div class="card-pad">
+        <div class="wizard-steps" style="margin-bottom:20px;">
+          <div class="wiz-step current"><span class="step-num">1</span>Type</div>
+          <div class="wiz-step"><span class="step-num">2</span>Student</div>
+          <div class="wiz-step"><span class="step-num">3</span>Parent</div>
+          <div class="wiz-step"><span class="step-num">4</span>Review</div>
+        </div>
+
+        <div style="font-size:14px;font-weight:600;color:var(--slate-700);margin-bottom:12px;">Applying for:</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Level <span class="req">*</span></label>
+          <select class="form-input" style="font-size:15px;padding:12px;">
+            <option value="">Select grade level...</option>
+            <optgroup label="Elementary">
+              <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+              <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+            </optgroup>
+            <optgroup label="Junior High School">
+              <option>Grade 7</option><option>Grade 8</option><option>Grade 9</option><option>Grade 10</option>
+            </optgroup>
+            <optgroup label="Senior High School">
+              <option>Grade 11 — STEM</option><option>Grade 11 — ABM</option>
+              <option>Grade 11 — HUMSS</option><option>Grade 11 — GAS</option>
+              <option>Grade 12 — STEM</option><option>Grade 12 — ABM</option>
+              <option>Grade 12 — HUMSS</option><option>Grade 12 — GAS</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="spec" data-label="Step 2 Fields (Student)" style="font-size:11px;margin-top:16px;">
+          Full name (first, middle, last) · DOB · Gender · Previous school · LRN (optional) · Address
+        </div>
+        <div class="spec" data-label="Step 3 Fields (Parent)" style="font-size:11px;">
+          Father info (name, contact, email) · Mother info · Guardian if different · "How did you hear about us?" · Church member? · Preferred assessment date
+        </div>
+        <div class="spec" data-label="Step 4 (Review & Submit)" style="font-size:11px;">
+          Summary of all info · Submit button · On success: show PRE-2025-XXXX number · "What happens next" card
+        </div>
+
+        <button class="btn btn-accent" style="width:100%;justify-content:center;margin-top:16px;padding:14px;font-size:15px;">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══════════════════════════════════════════════
+     STUDENT PROFILE MODAL
+     ═══════════════════════════════════════════════ -->
+<div class="modal-bg" id="profile-modal">
+  <div class="modal-panel modal-lg">
+    <div class="modal-top">
+      <div>
+        <h2>Student Profile</h2>
+        <div class="mono" style="color:var(--slate-400);margin-top:2px;">ACAD-2025-00001</div>
+      </div>
+      <button class="modal-x" onclick="hideModal('profile-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="spec" data-label="Claude Code — Student Profile Page" style="margin-top:0;">
+        <strong>File:</strong> <span class="file-path">/dashboard/students/[id]/page.tsx</span><br>
+        <strong>Tabbed layout with 6 tabs:</strong> Personal Info, Family, Enrollment History, Academics (grades), Account (balance), Documents<br>
+        <strong>Query:</strong> Fetch student + profile + current enrollment + guardians in single query using Supabase joins<br>
+        <strong>Edit:</strong> Inline edit mode on Personal Info tab. Save to both <code>profiles</code> and <code>students</code> tables.
+      </div>
+
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+        <div class="avatar avatar-xl" style="background:#6366f1;">MR</div>
+        <div>
+          <div style="font-size:20px;font-weight:800;color:var(--slate-900);">Reyes, Maria Angela Chua</div>
+          <div style="font-size:13px;color:var(--slate-500);">Grade 10 · St. Paul Section · Academy</div>
+          <div style="margin-top:6px;display:flex;gap:6px;">
+            <span class="badge badge-emerald badge-dot">Enrolled</span>
+            <span class="badge badge-slate">Female</span>
+            <span class="badge badge-slate">Filipino</span>
+          </div>
+        </div>
+        <div style="margin-left:auto;"><button class="btn btn-secondary btn-sm">✏️ Edit</button></div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active">Personal</button>
+        <button class="tab-btn">Family</button>
+        <button class="tab-btn">Enrollment</button>
+        <button class="tab-btn">Grades</button>
+        <button class="tab-btn">Account</button>
+        <button class="tab-btn">Documents</button>
+      </div>
+
+      <div class="form-grid" style="font-size:13px;">
+        <div><span style="color:var(--slate-500);font-size:12px;">Date of Birth</span><br><strong>March 15, 2011</strong> (14 years old)</div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Gender</span><br><strong>Female</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">LRN</span><br><strong class="mono">114523678901</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Religion</span><br><strong>Christian</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Contact</span><br><strong>+63 917 123 4567</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Email</span><br><strong>maria.reyes@email.com</strong></div>
+        <div style="grid-column:1/-1;"><span style="color:var(--slate-500);font-size:12px;">Address</span><br><strong>123 Rizal St., Brgy. San Antonio, Quezon City, Metro Manila 1100</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Admission Date</span><br><strong>June 12, 2019</strong></div>
+        <div><span style="color:var(--slate-500);font-size:12px;">Student Number</span><br><strong class="mono">ACAD-2025-00001</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════ -->
+<script>
+  // Page navigation
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tn-btn').forEach(b => b.classList.remove('active'));
+    const page = document.getElementById('pg-' + id);
+    if (page) page.classList.add('active');
+    const btn = document.querySelector(`.tn-btn[data-page="${id}"]`);
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.tn-btn').forEach(btn => {
+    btn.addEventListener('click', () => showPage(btn.dataset.page));
+  });
+
+  // Academics tabs
+  function switchAcadTab(el, contentId) {
+    document.querySelectorAll('#acad-tabs .tab-btn').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    ['at-subjects','at-sections','at-grades','at-attendance'].forEach(id => {
+      const c = document.getElementById(id);
+      if (c) c.classList.remove('active');
+    });
+    const target = document.getElementById(contentId);
+    if (target) target.classList.add('active');
+  }
+
+  // Modals
+  function showModal(id) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function hideModal(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-bg').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) { m.classList.remove('show'); document.body.style.overflow = ''; } });
+  });
+
+  // Checkbox toggles
+  document.querySelectorAll('.checkbox').forEach(cb => {
+    cb.addEventListener('click', () => {
+      cb.classList.toggle('checked');
+      cb.textContent = cb.classList.contains('checked') ? '✓' : '';
+    });
+  });
+</script>
+</body>
+</html>
