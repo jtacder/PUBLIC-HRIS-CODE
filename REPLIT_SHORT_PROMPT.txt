@@ -1,0 +1,53 @@
+CRITICAL: Fix attendance system timezone bugs. All dates must be Philippines local time (UTC+8).
+
+PROBLEM: The code uses getPhilippineTime() which adds 8 hours, but then uses LOCAL timezone methods (getHours, setHours, getDate, setDate) on these shifted Date objects. This breaks when server runs in UTC.
+
+SOLUTION: Replace ALL local timezone methods with UTC methods on PHT-shifted Date objects.
+
+CHANGES NEEDED:
+
+1. server/utils/datetime.ts - formatTimestampAsPHT() line ~86-91:
+   Change: getFullYear() → getUTCFullYear()
+   Change: getMonth() → getUTCMonth()
+   Change: getDate() → getUTCDate()
+   Change: getHours() → getUTCHours()
+   Change: getMinutes() → getUTCMinutes()
+   Change: getSeconds() → getUTCSeconds()
+
+2. server/utils/datetime.ts - getScheduledShiftDate() line ~162-164:
+   Change: now.getHours() → now.getUTCHours()
+   Change: yesterday.setDate() → yesterday.setUTCDate()
+   Change: yesterday.getDate() → yesterday.getUTCDate()
+
+3. server/utils/datetime.ts - calculateWorkingDays() line ~183-187:
+   Change: tempDate.getDay() → tempDate.getUTCDay()
+   Change: tempDate.setDate() → tempDate.setUTCDate()
+   Change: tempDate.getDate() → tempDate.getUTCDate()
+
+4. server/routes/attendance.ts - line ~59:
+   Change: const currentHour = now.getHours() → now.getUTCHours()
+
+5. server/routes/attendance.ts - line ~78:
+   Change: yesterday.setDate(yesterday.getDate() - 1) → yesterday.setUTCDate(yesterday.getUTCDate() - 1)
+
+6. server/routes/attendance.ts - line ~149:
+   Change: shiftStartToday.setHours() → shiftStartToday.setUTCHours()
+
+7. server/routes/attendance.ts - line ~307:
+   Change: shiftStart.setHours() → shiftStart.setUTCHours()
+
+8. server/routes/attendance.ts - line ~34:
+   Change: end.setHours(23, 59, 59, 999) → end.setUTCHours(23, 59, 59, 999)
+
+9. server/routes/dashboard.ts - line ~4:
+   Add getPhilippineTime to import
+
+10. server/routes/dashboard.ts - line ~25-28:
+    Change: const now = new Date() → const now = getPhilippineTime()
+    Change: now.getDate() → now.getUTCDate()
+    Change: now.getMonth() → now.getUTCMonth()
+    Change: now.getFullYear() → now.getUTCFullYear()
+
+WHY: When server runs in UTC timezone (Replit default), local methods return wrong values. UTC methods read the already-shifted PHT time correctly.
+
+IMPACT: Fixes attendance dates, night shift detection, late calculations, manual entry, date filters, and dashboard stats.
