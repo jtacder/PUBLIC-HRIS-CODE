@@ -1,0 +1,82 @@
+-- ============================================================================
+-- Module 15: Employee Portal (Self-Service)
+-- File: rls-policies.sql
+-- Row Level Security Policies
+-- ============================================================================
+-- The Employee Portal relies on RLS policies defined in each source module.
+-- This file documents the self-service access pattern applied across modules.
+--
+-- Core Pattern:
+--   All self-service queries filter by the authenticated user's employee_id.
+--   This is enforced at BOTH the application layer (WHERE clause) and the
+--   database layer (RLS policies on source tables).
+-- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- Self-Service Access Pattern (applied in source module RLS policies)
+-- ---------------------------------------------------------------------------
+--
+-- The following RLS pattern is used across all source tables to allow
+-- employees to read their own data. These policies are defined in their
+-- respective module rls-policies.sql files.
+--
+-- Pattern: Employee can SELECT rows where their employee record matches
+--
+--   CREATE POLICY {table}_self_select ON {table}
+--       FOR SELECT
+--       TO authenticated
+--       USING (
+--           employee_id IN (
+--               SELECT e.id FROM employees e
+--               WHERE e.user_id = current_setting('app.current_user_id')::UUID
+--           )
+--       );
+--
+-- Tables with this self-select pattern:
+--   - attendance_logs     (04-attendance-system/database/rls-policies.sql)
+--   - leave_requests      (06-leave-management/database/rls-policies.sql)
+--   - leave_allocations   (06-leave-management/database/rls-policies.sql)
+--   - cash_advances       (07-loans-management/database/rls-policies.sql)
+--   - payroll_records     (08-payroll-system/database/rls-policies.sql)
+--   - disciplinary_records (09-disciplinary/database/rls-policies.sql)
+--   - tasks (via assigned_to_id) (17-task-management/database/rls-policies.sql)
+--   - expenses (via requester_id) (18-expense-management/database/rls-policies.sql)
+--
+-- For employees table self-access:
+--   - employees           (02-employee-management/database/rls-policies.sql)
+--     Uses: user_id = current_setting('app.current_user_id')::UUID
+--
+-- ---------------------------------------------------------------------------
+-- Self-Service Write Pattern
+-- ---------------------------------------------------------------------------
+--
+-- Employees can perform limited writes through self-service:
+--
+-- 1. Profile Update (employees table):
+--    Application layer restricts updatable fields to:
+--    phone, address, city, province, zip_code,
+--    emergency_contact_name, emergency_contact_phone, emergency_contact_relationship
+--
+-- 2. Leave Request Submission (leave_requests table):
+--    Application validates sufficient balance and non-overlapping dates
+--
+-- 3. Cash Advance Request (cash_advances table):
+--    Application validates no pending requests above threshold
+--
+-- 4. Expense Submission (expenses table):
+--    Application validates required fields and receipt upload
+--
+-- 5. Task Status Update (tasks table):
+--    Application restricts to: In_Progress, Done status transitions only
+--
+-- 6. Task Comments (task_comments table):
+--    Employees can add comments to their assigned tasks
+--
+-- 7. NTE Response (disciplinary_records table):
+--    Employees can submit explanation text for NTEs issued to them
+--
+-- 8. Devotional Mark-Read (devotional_reading_logs table):
+--    Employees can mark devotionals as read
+
+-- No additional RLS policies defined here.
+-- Self-service access is governed by the RLS policies in each source module.

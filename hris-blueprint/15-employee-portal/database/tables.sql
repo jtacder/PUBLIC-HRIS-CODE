@@ -1,0 +1,53 @@
+-- ============================================================================
+-- Module 15: Employee Portal (Self-Service)
+-- File: tables.sql
+-- ============================================================================
+-- The Employee Portal does NOT own any tables.
+-- It reads from and writes to tables owned by other modules, always scoped
+-- to the authenticated employee's own records.
+--
+-- Tables accessed by this module:
+--
+--   READ:
+--   - employees           (own profile data)
+--   - attendance_logs     (own attendance history, today's status)
+--   - tasks               (tasks assigned to self)
+--   - task_comments        (comments on assigned tasks)
+--   - payroll_records     (own payslips, released only)
+--   - disciplinary_records (own NTEs and disciplinary history)
+--   - leave_requests      (own leave requests and history)
+--   - leave_allocations   (own leave balances by type)
+--   - leave_types         (leave type definitions for display)
+--   - cash_advances       (own cash advance requests)
+--   - expenses            (own expense submissions)
+--   - projects            (projects assigned to self, for context)
+--   - project_assignments (own project assignments)
+--   - devotionals         (today's devotional reading)
+--   - devotional_reading_logs (own reading status)
+--
+--   WRITE (limited):
+--   - employees           (UPDATE limited fields: phone, address, emergency contact)
+--   - tasks               (UPDATE status only on assigned tasks)
+--   - task_comments        (INSERT comments on assigned tasks)
+--   - leave_requests      (INSERT new leave requests)
+--   - cash_advances       (INSERT new cash advance requests)
+--   - expenses            (INSERT new expense submissions)
+--   - disciplinary_records (UPDATE explanation_text for own NTEs)
+--   - devotional_reading_logs (INSERT mark-as-read)
+--
+-- All access is enforced at the application layer:
+--   WHERE employee_id = req.user.employeeId
+--
+-- See individual module database files for table definitions:
+--   02-employee-management/database/tables.sql
+--   04-attendance-system/database/tables.sql
+--   06-leave-management/database/tables.sql
+--   07-loans-management/database/tables.sql
+--   08-payroll-system/database/tables.sql
+--   09-disciplinary/database/tables.sql
+--   17-task-management/database/tables.sql
+--   18-expense-management/database/tables.sql
+-- ============================================================================
+
+-- No CREATE TABLE statements required for this module.
+-- See individual module database folders for all table definitions.
