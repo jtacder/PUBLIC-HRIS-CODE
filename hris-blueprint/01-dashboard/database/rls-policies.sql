@@ -1,0 +1,35 @@
+-- ============================================================================
+-- Module 01: Dashboard
+-- File: rls-policies.sql
+-- Row Level Security Policies
+-- ============================================================================
+-- The Dashboard module aggregates data from other modules.
+-- RLS policies are defined on the source tables in their respective modules.
+--
+-- Access Control Summary:
+--   ADMIN  : Full dashboard with all widgets and metrics
+--   HR     : Full dashboard with all widgets and metrics
+--   ENGINEER: Project-scoped dashboard (own projects, assigned tasks)
+--   WORKER  : Personal dashboard (own attendance, leave, payslips)
+-- ============================================================================
+
+-- No RLS policies defined here.
+-- Dashboard access is controlled at the application layer via role checks.
+-- Individual data queries respect the RLS policies on their source tables.
+
+-- Example application-layer access control (implemented in middleware):
+--
+-- ADMIN/HR:
+--   - See aggregate stats for ALL employees
+--   - See all pending approvals
+--   - See full activity feed
+--
+-- ENGINEER:
+--   - See aggregate stats for assigned project teams
+--   - See own pending items
+--   - See project-scoped activity
+--
+-- WORKER:
+--   - See only personal stats (own attendance, leave balance, payslip)
+--   - See own pending items
+--   - See today's devotional

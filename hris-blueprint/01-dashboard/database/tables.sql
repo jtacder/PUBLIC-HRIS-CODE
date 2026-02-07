@@ -1,0 +1,35 @@
+-- ============================================================================
+-- Module 01: Dashboard
+-- File: tables.sql
+-- ============================================================================
+-- The Dashboard module does NOT own any tables.
+-- It reads from multiple tables across the system to display summary widgets.
+--
+-- Tables read by this module:
+--   - employees         (headcount, department breakdown, status distribution)
+--   - attendance_logs   (today's attendance summary, late count)
+--   - leave_requests    (pending leave requests count)
+--   - payroll_records   (current payroll period status)
+--   - projects          (active projects count)
+--   - tasks             (task status distribution)
+--   - cash_advances     (pending approvals count)
+--   - expenses          (pending expense claims)
+--   - notifications     (unread notification count)
+--   - audit_logs        (recent activity feed)
+--   - devotionals       (today's devotional)
+--
+-- Dashboard Widgets:
+--   1. Total Employee Count (Active)
+--   2. Today's Attendance (Present / Absent / Late)
+--   3. Pending Leave Requests
+--   4. Current Payroll Status
+--   5. Active Projects Count
+--   6. Task Progress (Todo / In Progress / Done)
+--   7. Pending Approvals (Leave, Cash Advance, Expenses)
+--   8. Recent Activity Feed (from audit_logs)
+--   9. Today's Devotional
+--   10. Birthday Celebrants (from employees.birth_date)
+-- ============================================================================
+
+-- No CREATE TABLE statements required for this module.
+-- See _shared/database/complete-schema.sql for all table definitions.
