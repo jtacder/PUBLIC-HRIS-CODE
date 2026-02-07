@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-mono: 'Geist Mono', 'SF Mono', monospace;
+
+    /* Light theme */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --card-border: 214 32% 91%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --popover-border: 214 32% 91%;
+
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --primary-border: transparent;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --secondary-border: transparent;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --muted-border: transparent;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --accent-border: transparent;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --destructive-border: transparent;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+
+    --chart-1: 173 58% 39%;
+    --chart-2: 12 76% 61%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Sidebar */
+    --sidebar: 222 47% 8%;
+    --sidebar-foreground: 210 40% 92%;
+    --sidebar-border: 222 30% 16%;
+    --sidebar-ring: 222 47% 11%;
+    --sidebar-primary: 40 60% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary-border: transparent;
+    --sidebar-accent: 222 30% 14%;
+    --sidebar-accent-foreground: 210 40% 92%;
+    --sidebar-accent-border: transparent;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
+    --card-border: 222 30% 16%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+    --popover-border: 222 30% 16%;
+
+    --primary: 40 60% 50%;
+    --primary-foreground: 222 47% 8%;
+    --primary-border: transparent;
+
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-border: transparent;
+
+    --muted: 222 30% 14%;
+    --muted-foreground: 215 20% 65%;
+    --muted-border: transparent;
+
+    --accent: 222 30% 14%;
+    --accent-foreground: 210 40% 98%;
+    --accent-border: transparent;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --destructive-border: transparent;
+
+    --border: 222 30% 16%;
+    --input: 222 30% 16%;
+    --ring: 40 60% 50%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 340 75% 55%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 160 60% 45%;
+
+    --sidebar: 222 47% 5%;
+    --sidebar-foreground: 210 40% 92%;
+    --sidebar-border: 222 30% 12%;
+    --sidebar-primary: 40 60% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 30% 10%;
+    --sidebar-accent-foreground: 210 40% 92%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.2s ease;
+}
